@@ -12,11 +12,11 @@ interface AuthContextType {
   isAuthenticated: boolean;
   login: (email: string, password: string) => boolean;
   logout: () => void;
-  register: (
-    email: string,
-    password: string,
-    role: "admin" | "user"
-  ) => boolean;
+  // register: (
+  //   email: string,
+  //   password: string,
+  //   role: "admin" | "user"
+  // ) => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -85,32 +85,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     localStorage.removeItem("user");
   };
 
-  const register = (
-    email: string,
-    password: string,
-    role: "admin" | "user"
-  ): boolean => {
-    // Check if user already exists
-    if (DEMO_USERS.some((u) => u.email === email)) {
-      return false;
-    }
+  // const register = (
+  //   email: string,
+  //   password: string,
+  //   role: "admin" | "user"
+  // ): boolean => {
+  //   // Check if user already exists
+  //   if (DEMO_USERS.some((u) => u.email === email)) {
+  //     return false;
+  //   }
 
-    const newUser: User = {
-      id: String(DEMO_USERS.length + 1),
-      email,
-      role,
-      name: email.split("@")[0],
-    };
+  //   const newUser: User = {
+  //     id: String(DEMO_USERS.length + 1),
+  //     email,
+  //     role,
+  //     name: email.split("@")[0],
+  //   };
 
-    setUser(newUser);
-    setIsAuthenticated(true);
-    localStorage.setItem("user", JSON.stringify(newUser));
-    return true;
-  };
+  //   setUser(newUser);
+  //   setIsAuthenticated(true);
+  //   localStorage.setItem("user", JSON.stringify(newUser));
+  //   return true;
+  // };
 
   return (
     <AuthContext.Provider
-      value={{ user, isAuthenticated, login, logout, register }}
+      // value={{ user, isAuthenticated, login, logout, register }}
+      value={{ user, isAuthenticated, login, logout }}
     >
       {children}
     </AuthContext.Provider>
