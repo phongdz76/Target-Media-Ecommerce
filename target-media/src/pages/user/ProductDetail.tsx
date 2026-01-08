@@ -225,3 +225,4 @@ export const ProductDetail = () => {
 };
 
 export default ProductDetail;
+/* complete */
