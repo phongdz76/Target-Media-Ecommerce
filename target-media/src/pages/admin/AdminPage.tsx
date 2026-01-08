@@ -1,3 +1,4 @@
+/* complete */
 import { Navbar } from "../../components/NavBar";
 import { UserManagement } from "../../components/UserManagement";
 import { ProductManagement } from "../../components/ProductManagement";
