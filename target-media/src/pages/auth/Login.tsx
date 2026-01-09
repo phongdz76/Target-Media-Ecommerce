@@ -29,7 +29,7 @@ export const Login = () => {
         }
       }
     } else {
-      setError("Email hoặc mật khẩu không đúng");
+      setError("Email or password is incorrect.");
     }
   };
 
