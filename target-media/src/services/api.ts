@@ -58,7 +58,7 @@ export const userService = {
 export const productService = {
   getAll: async (): Promise<Product[]> => {
     const response = await api.get("/posts");
-    return response.data.slice(0, 12).map((post: any, index: number) => ({
+    return response.data.map((post: any, index: number) => ({
       id: post.id,
       title: post.title,
       description: post.body,

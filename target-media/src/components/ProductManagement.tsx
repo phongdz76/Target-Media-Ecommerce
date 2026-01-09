@@ -3,6 +3,8 @@ import "./ProductManagement.css";
 import { Product } from "../types";
 import { productService } from "../services/api";
 
+const ITEMS_PER_PAGE = 10;
+
 export const ProductManagement = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
@@ -13,6 +15,7 @@ export const ProductManagement = () => {
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
   const [formData, setFormData] = useState<
     Omit<Product, "id"> & { id?: number }
   >({
@@ -130,6 +133,24 @@ export const ProductManagement = () => {
       product.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Pagination logic
+  const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const paginatedProducts = filteredProducts.slice(
+    startIndex,
+    startIndex + ITEMS_PER_PAGE
+  );
+
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value);
+    setCurrentPage(1);
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
     <div className="product-management">
       <div className="management-header">
@@ -245,7 +266,7 @@ export const ProductManagement = () => {
           type="text"
           placeholder="Search products by title or description..."
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={(e) => handleSearchChange(e.target.value)}
           className="search-input"
         />
       </div>
@@ -255,59 +276,121 @@ export const ProductManagement = () => {
           <div className="spinner"></div>
         </div>
       ) : (
-        <div className="products-grid">
-          {filteredProducts.length === 0 ? (
-            <p className="no-data">
-              {searchTerm
-                ? "No products match your search"
-                : "No products found"}
-            </p>
-          ) : (
-            filteredProducts.map((product) => (
-              <div key={product.id} className="product-card">
-                <div className="product-image-container">
-                  <img
-                    src={product.image}
-                    alt={product.title}
-                    className="product-image"
-                  />
-                  <div className="product-overlay">
-                    <button
-                      className="btn btn-sm btn-warning"
-                      onClick={() => handleViewDetails(product)}
-                    >
-                      Details
-                    </button>
-                    <button
-                      className="btn btn-sm btn-info"
-                      onClick={() => handleEdit(product)}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      className="btn btn-sm btn-danger"
-                      onClick={() => handleDelete(product.id)}
-                    >
-                      Delete
-                    </button>
+        <>
+          <div className="products-grid">
+            {paginatedProducts.length === 0 ? (
+              <p className="no-data">
+                {searchTerm
+                  ? "No products match your search"
+                  : "No products found"}
+              </p>
+            ) : (
+              paginatedProducts.map((product) => (
+                <div key={product.id} className="product-card">
+                  <div className="product-image-container">
+                    <img
+                      src={product.image}
+                      alt={product.title}
+                      className="product-image"
+                    />
+                    <div className="product-overlay">
+                      <button
+                        className="btn btn-sm btn-warning"
+                        onClick={() => handleViewDetails(product)}
+                      >
+                        Details
+                      </button>
+                      <button
+                        className="btn btn-sm btn-info"
+                        onClick={() => handleEdit(product)}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        className="btn btn-sm btn-danger"
+                        onClick={() => handleDelete(product.id)}
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </div>
-                </div>
-                <div className="product-info">
-                  <div className="product-category">{product.category}</div>
-                  <h3>{product.title}</h3>
-                  <p className="product-description">
-                    {product.description.substring(0, 100)}...
-                  </p>
-                  <div className="product-footer">
-                    <div className="product-price">
-                      ${product.price.toFixed(2)}
+                  <div className="product-info">
+                    <div className="product-category">{product.category}</div>
+                    <h3>{product.title}</h3>
+                    <p className="product-description">
+                      {product.description.substring(0, 100)}...
+                    </p>
+                    <div className="product-footer">
+                      <div className="product-price">
+                        ${product.price.toFixed(2)}
+                      </div>
                     </div>
                   </div>
                 </div>
+              ))
+            )}
+          </div>
+
+          {totalPages > 1 && (
+            <div className="pagination">
+              <button
+                className="pagination-btn"
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+              >
+                ← Previous
+              </button>
+
+              <div className="pagination-numbers">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                  (page) => {
+                    if (
+                      page === 1 ||
+                      page === totalPages ||
+                      (page >= currentPage - 1 && page <= currentPage + 1)
+                    ) {
+                      return (
+                        <button
+                          key={page}
+                          className={`pagination-number ${
+                            currentPage === page ? "active" : ""
+                          }`}
+                          onClick={() => handlePageChange(page)}
+                        >
+                          {page}
+                        </button>
+                      );
+                    } else if (
+                      page === currentPage - 2 ||
+                      page === currentPage + 2
+                    ) {
+                      return (
+                        <span key={page} className="pagination-ellipsis">
+                          ...
+                        </span>
+                      );
+                    }
+                    return null;
+                  }
+                )}
               </div>
-            ))
+
+              <button
+                className="pagination-btn"
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+              >
+                Next →
+              </button>
+            </div>
           )}
-        </div>
+
+          <div className="pagination-info">
+            Showing {startIndex + 1}-
+            {Math.min(startIndex + ITEMS_PER_PAGE, filteredProducts.length)} of{" "}
+            {filteredProducts.length} products
+          </div>
+        </>
       )}
 
       {selectedProduct && (
