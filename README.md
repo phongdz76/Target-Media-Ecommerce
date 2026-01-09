@@ -1,7 +1,7 @@
 # Target-Media-Ecommerce
 
 Email user mẫu để đăng nhập ứng dụng:
-email: user@user.com
+<li>email: user@user.com</li>
 password: user123
 
 Email admin để đăng nhập ứng dụng:
