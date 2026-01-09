@@ -1,4 +1,4 @@
-import { useState, useEffect, FormEvent } from "react";
+import { useState, useEffect, FormEvent, ChangeEvent, useRef } from "react";
 import "./ProductManagement.css";
 import { Product } from "../types";
 import { productService } from "../services/api";
@@ -16,6 +16,8 @@ export const ProductManagement = () => {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState<
     Omit<Product, "id"> & { id?: number }
   >({
@@ -23,6 +25,7 @@ export const ProductManagement = () => {
     description: "",
     price: 0,
     category: "Electronics",
+    image: "",
   });
 
   useEffect(() => {
@@ -96,7 +99,9 @@ export const ProductManagement = () => {
       description: product.description,
       price: product.price,
       category: product.category,
+      image: product.image || "",
     });
+    setImagePreview(product.image || null);
     setShowForm(true);
   };
 
@@ -122,9 +127,47 @@ export const ProductManagement = () => {
       description: "",
       price: 0,
       category: "Electronics",
+      image: "",
     });
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
     setEditingId(null);
     setShowForm(false);
+  };
+
+  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith("image/")) {
+        showErrorMessage("Please select a valid image file.");
+        return;
+      }
+
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        showErrorMessage("Image size should be less than 5MB.");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        setImagePreview(base64String);
+        setFormData({ ...formData, image: base64String });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setImagePreview(null);
+    setFormData({ ...formData, image: "" });
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
   const filteredProducts = products.filter(
@@ -231,6 +274,36 @@ export const ProductManagement = () => {
               rows={4}
               required
             />
+          </div>
+          <div className="form-group">
+            <label htmlFor="image">Product Image</label>
+            <div className="image-upload-container">
+              <input
+                ref={fileInputRef}
+                id="image"
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="image-input"
+              />
+              <label htmlFor="image" className="image-upload-label">
+                <span className="upload-icon">📁</span>
+                <span>Choose an image or drag it here</span>
+                <span className="upload-hint">PNG, JPG, GIF up to 5MB</span>
+              </label>
+              {imagePreview && (
+                <div className="image-preview">
+                  <img src={imagePreview} alt="Preview" />
+                  <button
+                    type="button"
+                    className="remove-image-btn"
+                    onClick={handleRemoveImage}
+                  >
+                    ×
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
           <div className="form-actions">
             <button
