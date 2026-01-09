@@ -26,7 +26,6 @@ const ProtectedRoute = ({
   }
 
   if (requiredRole && user?.role !== requiredRole) {
-    // Redirect to their respective dashboard
     return (
       <Navigate to={user?.role === "admin" ? "/admin" : "/user"} replace />
     );
@@ -36,12 +35,25 @@ const ProtectedRoute = ({
 };
 
 function App() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
 
   return (
     <Router>
       <Routes>
-        <Route path="/login" element={<Login />} />
+        {/* Login Route */}
+        <Route
+          path="/login"
+          element={
+            isAuthenticated ? (
+              <Navigate
+                to={user?.role === "admin" ? "/admin" : "/user"}
+                replace
+              />
+            ) : (
+              <Login />
+            )
+          }
+        />
 
         {/* Admin Routes */}
         <Route
@@ -65,19 +77,21 @@ function App() {
           }
         />
 
-        {/* Default Route */}
+        {/* Default Route - Redirect based on auth status and role */}
         <Route
           path="/"
           element={
-            isAuthenticated ? (
+            !isAuthenticated ? (
+              <Navigate to="/login" replace />
+            ) : user?.role === "admin" ? (
               <Navigate to="/admin" replace />
             ) : (
-              <Navigate to="/login" replace />
+              <Navigate to="/user" replace />
             )
           }
         />
 
-        {/* Catch all */}
+        {/* Catch all - Redirect to home */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
