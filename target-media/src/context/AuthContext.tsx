@@ -47,14 +47,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // Check if user is logged in on mount
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
+    const storedUser = sessionStorage.getItem("user");
     if (storedUser) {
       try {
         const parsedUser = JSON.parse(storedUser);
         setUser(parsedUser);
         setIsAuthenticated(true);
       } catch (error) {
-        localStorage.removeItem("user");
+        sessionStorage.removeItem("user");
       }
     }
   }, []);
@@ -73,7 +73,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       };
       setUser(userData);
       setIsAuthenticated(true);
-      localStorage.setItem("user", JSON.stringify(userData));
+      sessionStorage.setItem("user", JSON.stringify(userData));
       return true;
     }
     return false;
@@ -82,7 +82,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const logout = () => {
     setUser(null);
     setIsAuthenticated(false);
-    localStorage.removeItem("user");
+    sessionStorage.removeItem("user");
   };
 
   // const register = (

@@ -18,8 +18,8 @@ export const Login = () => {
     const success = login(email, password);
 
     if (success) {
-      // Lấy user từ localStorage để check role
-      const userStr = localStorage.getItem("user");
+      // Lấy user từ sessionStorage để check role
+      const userStr = sessionStorage.getItem("user");
       if (userStr) {
         const user = JSON.parse(userStr);
         if (user.role === "admin") {
